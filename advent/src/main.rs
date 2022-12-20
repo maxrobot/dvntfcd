@@ -6,35 +6,34 @@ fn main() {
     println!("Hello, world!");
 
     if let Ok(lines) = read_lines("./advent/src/data.txt") {
-        let mut count: u64 = 0u64;
-        let mut point: u64 = 0u64;
         let mut calories: u64 = 0u64;
-        let mut elf: u64 = 0u64;
+        let mut elves: Vec<u64> = Vec::new();
 
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(ip) = line {
                 if ip == "".to_string() {
-                    println!("{} {}", elf, calories);
-
-                    if elf > calories {
-                        calories = elf;
-                        point = count;
+                    if elves.len() < 3 {
+                        elves.push(calories);
+                    } else {
+                        let min = *elves.iter().min().unwrap();
+                        if calories > min {
+                            elves.remove(elves.iter().position(|x| *x == min).unwrap());
+                            elves.push(calories);
+                        }
                     }
-
-                    count += 1u64;
-                    elf = 0u64;
+                    // println!("{}", calories);
+                    calories = 0u64;
                 }
 
                 if ip != "".to_string() {
-                    elf += ip.parse::<u64>().unwrap();
+                    calories += ip.parse::<u64>().unwrap();
                 }
             }
         }
 
-        println!("{}", count);
-        println!("{}", calories);
-        println!("{}", point);
+        let sum: u64 = elves.iter().sum();
+        println!("{}", sum);
     }
 }
 
