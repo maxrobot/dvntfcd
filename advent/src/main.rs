@@ -1,48 +1,49 @@
 use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
+use std::io::{self};
 
 fn main() {
     println!("Hello, world!");
 
-    if let Ok(lines) = read_lines("./advent/src/data.txt") {
-        let mut calories: u64 = 0u64;
-        let mut elves: Vec<u64> = Vec::new();
+    let file = File::open("./advent/src/data.txt").unwrap();
 
-        // Consumes the iterator, returns an (Optional) String
-        for line in lines {
-            if let Ok(ip) = line {
-                if ip == "".to_string() {
-                    if elves.len() < 3 {
-                        elves.push(calories);
-                    } else {
-                        let min = *elves.iter().min().unwrap();
-                        if calories > min {
-                            elves.remove(elves.iter().position(|x| *x == min).unwrap());
-                            elves.push(calories);
-                        }
-                    }
-                    // println!("{}", calories);
-                    calories = 0u64;
-                }
+    let mut rdr = csv::ReaderBuilder::new()
+        .has_headers(false)
+        .delimiter(b' ')
+        .from_reader(io::BufReader::new(file));
 
-                if ip != "".to_string() {
-                    calories += ip.parse::<u64>().unwrap();
-                }
-            }
-        }
-
-        let sum: u64 = elves.iter().sum();
-        println!("{}", sum);
+    let mut val: u64 = 0u64;
+    for result in rdr.records() {
+        let record = result.unwrap();
+        val += play(&record[0], &record[1]);
     }
+
+    println!("{}", val);
 }
 
-// The output is wrapped in a Result to allow matching on errors
-// Returns an Iterator to the Reader of the lines of the file.
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
+fn play(opp: &str, user: &str) -> u64 {
+    println!("{} {}", opp, user);
+
+    let score: u64 = match opp {
+        "A" => match user {
+            "X" => 3u64,
+            "Y" => 4u64,
+            "Z" => 8u64,
+            _ => todo!(),
+        },
+        "B" => match user {
+            "X" => 1u64,
+            "Y" => 3u64 + 2u64,
+            "Z" => 6u64 + 3u64,
+            _ => todo!(),
+        },
+        "C" => match user {
+            "X" => 0u64 + 2u64,
+            "Y" => 3u64 + 3u64,
+            "Z" => 6u64 + 1u64,
+            _ => todo!(),
+        },
+        _ => todo!(),
+    };
+
+    return score;
 }
